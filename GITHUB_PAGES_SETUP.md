@@ -51,7 +51,7 @@ git push -u origin main
 
 数分待つと、以下のURLでアクセスできます：
 ```
-https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
+https://kojimakenzi.github.io/arobake/
 ```
 
 例: `https://kojimakenji.github.io/obake/`
