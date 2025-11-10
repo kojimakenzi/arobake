@@ -1,0 +1,22 @@
+{
+  "name": "ar-image-display-app",
+  "version": "1.0.0",
+  "description": "AR画像表示アプリ - ARマーカーを使用して画像を表示",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -c-1",
+    "dev": "npx http-server -p 8080 -c-1 -o"
+  },
+  "keywords": [
+    "AR",
+    "augmented-reality",
+    "arjs",
+    "aframe"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
+

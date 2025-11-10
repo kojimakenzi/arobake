@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR画像表示アプリ</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .info h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .info p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .marker-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>👻 AR画像表示アプリ</h1>
+        <p>カメラをARマーカーに向けてください</p>
+        <div class="marker-info">
+            <p><strong>使い方：</strong></p>
+            <p>1. マーカー画像（armarker.png）を印刷または画面に表示</p>
+            <p>2. カメラのアクセス許可を許可してください</p>
+            <p>3. カメラをマーカーに向けると画像が表示されます</p>
+        </div>
+    </div>
+
+    <a-scene
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true;"
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/data/data/camera_para.dat; maxDetectionRate: 60; canvasWidth: 640; canvasHeight: 480;"
+    >
+        <!-- マーカー -->
+        <a-marker
+            type="pattern"
+            preset="custom"
+            url="images/armarker.patt"
+            raycaster="objects: .clickable"
+            emitevents="true"
+            cursor="fuse: false; rayOrigin: mouse;"
+            id="marker"
+        >
+            <!-- 表示する画像 -->
+            <a-image
+                src="images/obake01.png"
+                position="0 0 0"
+                rotation="0 0 0"
+                scale="1 1 1"
+                class="clickable"
+            ></a-image>
+        </a-marker>
+
+        <!-- カメラ -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        // マーカー検出時のイベント
+        const marker = document.querySelector('#marker');
+        
+        marker.addEventListener('markerFound', function() {
+            console.log('マーカーを検出しました！');
+        });
+        
+        marker.addEventListener('markerLost', function() {
+            console.log('マーカーを見失いました');
+        });
+    </script>
+</body>
+</html>
+
