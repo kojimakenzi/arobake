@@ -58,7 +58,8 @@
         vr-mode-ui="enabled: false"
         renderer="logarithmicDepthBuffer: true;"
         embedded
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/data/data/camera_para.dat; maxDetectionRate: 60; canvasWidth: 640; canvasHeight: 480;">
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/data/data/camera_para.dat; maxDetectionRate: 60; canvasWidth: 640; canvasHeight: 480;"
+    >
         <!-- マーカー -->
         <a-marker
             type="pattern"
@@ -67,14 +68,16 @@
             raycaster="objects: .clickable"
             emitevents="true"
             cursor="fuse: false; rayOrigin: mouse;"
-            id="marker">
+            id="marker"
+        >
             <!-- 表示する画像 -->
             <a-image
                 src="images/obake01.png"
-                position="1 0 0"
+                position="0 0 0"
                 rotation="0 0 0"
                 scale="1 1 1"
-                class="clickable"></a-image>
+                class="clickable"
+            ></a-image>
         </a-marker>
 
         <!-- カメラ -->
