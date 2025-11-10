@@ -40,6 +40,42 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 5px;
         }
+        .stamp-rally {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 5px;
+            border: 2px solid rgba(76, 175, 80, 0.5);
+        }
+        .stamp-item {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .stamp-item.collected {
+            background: rgba(76, 175, 80, 0.5);
+            border: 2px solid rgba(76, 175, 80, 1);
+        }
+        .prize {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.3);
+            border-radius: 5px;
+            border: 2px solid rgba(255, 193, 7, 0.8);
+            text-align: center;
+            display: none;
+        }
+        .prize.show {
+            display: block;
+            animation: bounce 0.5s;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
@@ -52,6 +88,15 @@
             <p>2. カメラのアクセス許可を許可してください</p>
             <p>3. カメラをマーカーに向けると画像が表示されます</p>
         </div>
+        <div class="stamp-rally">
+            <p><strong>📋 スタンプラリー</strong></p>
+            <div id="stamp-list"></div>
+            <div class="prize" id="prize">
+                <h2>🎉 おめでとうございます！</h2>
+                <p>全てのマーカーを読み取りました！</p>
+                <p>景品: 特別なAR体験が解放されました！</p>
+            </div>
+        </div>
     </div>
 
     <a-scene
@@ -60,7 +105,7 @@
         embedded
         arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/data/data/camera_para.dat; maxDetectionRate: 60; canvasWidth: 640; canvasHeight: 480;"
     >
-        <!-- マーカー -->
+        <!-- マーカー1 -->
         <a-marker
             type="pattern"
             preset="custom"
@@ -68,7 +113,9 @@
             raycaster="objects: .clickable"
             emitevents="true"
             cursor="fuse: false; rayOrigin: mouse;"
-            id="marker"
+            id="marker1"
+            data-marker-id="marker1"
+            data-marker-name="マーカー1"
         >
             <!-- 表示する画像 -->
             <a-image
@@ -80,20 +127,140 @@
             ></a-image>
         </a-marker>
 
+        <!-- マーカー2（追加のマーカーがある場合、別の.pattファイルを用意） -->
+        <!-- 
+        <a-marker
+            type="pattern"
+            preset="custom"
+            url="images/marker2.patt"
+            raycaster="objects: .clickable"
+            emitevents="true"
+            cursor="fuse: false; rayOrigin: mouse;"
+            id="marker2"
+            data-marker-id="marker2"
+            data-marker-name="マーカー2"
+        >
+            <a-image
+                src="images/obake02.png"
+                position="0 0 0"
+                rotation="-90 0 0"
+                scale="1 1 1"
+                class="clickable"
+            ></a-image>
+        </a-marker>
+        -->
+
         <!-- カメラ -->
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // マーカー検出時のイベント
-        const marker = document.querySelector('#marker');
-        
-        marker.addEventListener('markerFound', function() {
-            console.log('マーカーを検出しました！');
-        });
-        
-        marker.addEventListener('markerLost', function() {
-            console.log('マーカーを見失いました');
+        // スタンプラリー管理クラス
+        class StampRally {
+            constructor() {
+                this.storageKey = 'ar_stamp_rally';
+                this.markers = [];
+                this.collectedMarkers = this.loadCollectedMarkers();
+                this.initMarkers();
+                this.updateStampDisplay();
+            }
+
+            // LocalStorageから読み取ったマーカーを読み込む
+            loadCollectedMarkers() {
+                const stored = localStorage.getItem(this.storageKey);
+                return stored ? JSON.parse(stored) : [];
+            }
+
+            // LocalStorageに保存
+            saveCollectedMarkers() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.collectedMarkers));
+            }
+
+            // マーカーを初期化
+            initMarkers() {
+                const markerElements = document.querySelectorAll('a-marker[data-marker-id]');
+                markerElements.forEach(marker => {
+                    const markerId = marker.getAttribute('data-marker-id');
+                    const markerName = marker.getAttribute('data-marker-name') || markerId;
+                    
+                    this.markers.push({
+                        id: markerId,
+                        name: markerName,
+                        element: marker
+                    });
+
+                    // マーカー検出イベント
+                    marker.addEventListener('markerFound', () => {
+                        this.onMarkerFound(markerId, markerName);
+                    });
+                });
+            }
+
+            // マーカー検出時の処理
+            onMarkerFound(markerId, markerName) {
+                if (!this.collectedMarkers.includes(markerId)) {
+                    this.collectedMarkers.push(markerId);
+                    this.saveCollectedMarkers();
+                    this.updateStampDisplay();
+                    console.log(`✅ ${markerName} を記録しました！`);
+                    
+                    // 全てのマーカーを読み取ったかチェック
+                    if (this.checkAllCollected()) {
+                        this.showPrize();
+                    }
+                }
+            }
+
+            // 全てのマーカーを読み取ったかチェック
+            checkAllCollected() {
+                return this.markers.length > 0 && 
+                       this.markers.every(marker => this.collectedMarkers.includes(marker.id));
+            }
+
+            // スタンプ表示を更新
+            updateStampDisplay() {
+                const stampList = document.getElementById('stamp-list');
+                stampList.innerHTML = '';
+
+                this.markers.forEach(marker => {
+                    const isCollected = this.collectedMarkers.includes(marker.id);
+                    const stampItem = document.createElement('div');
+                    stampItem.className = `stamp-item ${isCollected ? 'collected' : ''}`;
+                    stampItem.textContent = isCollected ? `✓ ${marker.name}` : `○ ${marker.name}`;
+                    stampList.appendChild(stampItem);
+                });
+
+                // 進捗表示
+                const progress = document.createElement('p');
+                progress.style.marginTop = '10px';
+                progress.style.fontSize = '12px';
+                progress.textContent = `進捗: ${this.collectedMarkers.length}/${this.markers.length}`;
+                stampList.appendChild(progress);
+            }
+
+            // 景品表示
+            showPrize() {
+                const prize = document.getElementById('prize');
+                prize.classList.add('show');
+                console.log('🎉 全てのマーカーを読み取りました！');
+            }
+
+            // リセット機能（デバッグ用）
+            reset() {
+                localStorage.removeItem(this.storageKey);
+                this.collectedMarkers = [];
+                this.updateStampDisplay();
+                document.getElementById('prize').classList.remove('show');
+                console.log('スタンプラリーをリセットしました');
+            }
+        }
+
+        // ページ読み込み時に初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            const stampRally = new StampRally();
+            
+            // デバッグ用：コンソールで reset() を実行するとリセット可能
+            window.stampRally = stampRally;
         });
     </script>
 </body>
