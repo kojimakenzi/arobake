@@ -101,13 +101,13 @@
     </div>
     -->
     <div class="info">
-        <p><strong>version 1.0.1</strong></p>
+        <p><strong>version 1.0.2</strong></p>
     </div>
     <a-scene
         vr-mode-ui="enabled: false"
         renderer="logarithmicDepthBuffer: true;"
         embedded
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/data/data/camera_para.dat; maxDetectionRate: 60; canvasWidth: 640; canvasHeight: 480;"
+        arjs="sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/data/data/camera_para.dat; maxDetectionRate: 60; canvasWidth: 640; canvasHeight: 480;"
     >
         <!-- マーカー1 -->
         <a-marker
@@ -164,16 +164,13 @@
             data-marker-id="marker3"
             data-marker-name="マーカー3"
         >
-        
-        <a-image
-        src="images/deteike.png"
-        position="0 0 0"
-        rotation="-90 0 0"
-        scale="1 1 1"
-        class="clickable"
-    >
-</a-image>
-
+            <a-image
+                src="images/deteike.png"
+                position="0 0 0"
+                rotation="-90 0 0"
+                scale="1 1 1"
+                class="clickable"
+            ></a-image>
         </a-marker>
 
         <!-- カメラ -->
@@ -217,7 +214,21 @@
 
                     // マーカー検出イベント
                     marker.addEventListener('markerFound', () => {
+                        console.log(`🔍 マーカー検出: ${markerName} (${markerId})`);
                         this.onMarkerFound(markerId, markerName);
+                    });
+                    
+                    marker.addEventListener('markerLost', () => {
+                        console.log(`❌ マーカー消失: ${markerName} (${markerId})`);
+                    });
+                    
+                    // パターンファイルの読み込みエラーをチェック
+                    marker.addEventListener('loaded', () => {
+                        console.log(`✅ パターンファイル読み込み成功: ${markerName} (${markerId})`);
+                    });
+                    
+                    marker.addEventListener('error', (e) => {
+                        console.error(`❌ パターンファイル読み込みエラー: ${markerName} (${markerId})`, e);
                     });
                 });
             }
@@ -287,6 +298,19 @@
             
             // デバッグ用：コンソールで reset() を実行するとリセット可能
             window.stampRally = stampRally;
+            
+            // マーカー3のパターンファイル読み込み状況を確認
+            const marker3 = document.querySelector('#marker3');
+            if (marker3) {
+                console.log('🔍 marker3の設定を確認:', {
+                    id: marker3.id,
+                    url: marker3.getAttribute('url'),
+                    type: marker3.getAttribute('type'),
+                    preset: marker3.getAttribute('preset')
+                });
+            } else {
+                console.error('❌ marker3が見つかりません');
+            }
         });
     </script>
 </body>
